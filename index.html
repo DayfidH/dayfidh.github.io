@@ -3,148 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <title>Song Ranker</title>
-    <style>
-        /* Updated body style to add the background image for side areas */
-        body { 
-            font-family: Arial, sans-serif; 
-            text-align: center; 
-            margin-top: 50px; 
-            background: url("https://a1.mzstatic.com/r40/Music211/v4/be/11/d1/be11d187-1aeb-99f3-01c5-597ed65cdb6a/25UMGIM07433.rgb.jpg") center center / cover no-repeat;
-        }
-        #duel { margin: 20px; }
-        button { font-size: 1.2em; margin: 10px; padding: 10px 20px; }
-        #ranking { 
-            margin-top: 30px; 
-            background: rgba(0, 0, 0, 0.6); /* new background to improve readability */
-            padding: 10px;
-            border-radius: 8px;
-            display: inline-block;
-        }
-        /* New: Add text contrast styling only for ranking list */
-        #ranking p,
-        #ranking li,
-        #prompt-container p {
-            color: white;
-            text-shadow: 2px 2px 6px rgba(0,0,0,0.8);
-
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <img id="header-image" src="assets/mayhem-logos-fontes-v0-pfy8vbt3e.png" alt="Mayhem Ranker Logo" style="max-width: 300px; width:100%; margin: 0 auto;">
+    <video id="background-video" autoplay muted loop>
+        <source src="assets/background.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <img id="header-image" src="assets/mayhem-logos-fontes-v0-pfy8vbt3e.png" alt="Mayhem Ranker Logo" style="max-width:300px; width:100%;">
     <div id="duel">
-        <!-- Encased the prompt text in a container with matching background style -->
-        <div id="prompt-container" style="background: rgba(0, 0, 0, 0.6); padding: 10px; border-radius: 8px; display: inline-block;">
-            <p>Which song do you prefer?</p>
+        <div id="prompt-container">
+            <p style="background-color: rgba(0, 0, 0, 0.5);">Which song do you prefer?</p>
         </div>
-        <button id="song1"></button>
-        <button id="song2"></button>
+        <div id="button-container">
+            <button id="song1"></button>
+            <button id="song2"></button>
+        </div>
     </div>
     <div id="ranking"></div>
+    <button id="toggleBackground">Toggle Background</button>
     
-    
-    <script>
-        // Initialize songs with starting rating
-        const songs = [
-            { name: "Disease", rating: 1500 },
-            { name: "Abracadabra", rating: 1500 },
-            { name: "Garden of Eden", rating: 1500 },
-            { name: "Perfect Celebrity", rating: 1500 },
-            { name: "Can't Stop The High", rating: 1500 },
-            { name: "Vanish Into You", rating: 1500 },
-            { name: "Killah (feat. Gesaffelstein)", rating: 1500 },
-            { name: "ZombieBoy", rating: 1500 },
-            { name: "LoveDrug", rating: 1500 },
-            { name: "How Bad Do U Want Me", rating: 1500 },
-            { name: "Kill For Love", rating: 1500 },
-            { name: "Don't Call Tonight", rating: 1500 },
-            { name: "Shadow of a Man", rating: 1500 },
-            { name: "The Beast", rating: 1500 },
-            { name: "Blade of Grass", rating: 1500 },
-            { name: "Die With a Smile (feat. Bruno Mars)", rating: 1500 }
-        ];
-        
-        const K = 32;
-        let currentPair = [];
-        let comparisonsCount = 0;
-        const maxComparisons = 100;  // stop after 100 comparisons
-
-        // Returns expected score for rating1 vs rating2
-        function expectedScore(rating1, rating2) {
-            return 1 / (1 + Math.pow(10, (rating2 - rating1) / 400));
-        }
-        
-        // Elo update for a winner and a loser
-        function updateRatings(winner, loser) {
-            const expWinner = expectedScore(winner.rating, loser.rating);
-            const expLoser = expectedScore(loser.rating, winner.rating);
-            winner.rating = winner.rating + K * (1 - expWinner);
-            loser.rating = loser.rating + K * (0 - expLoser);
-        }
-        
-        // Pick two distinct random songs
-        function pickPair() {
-            const idx1 = Math.floor(Math.random() * songs.length);
-            let idx2;
-            do {
-                idx2 = Math.floor(Math.random() * songs.length);
-            } while (idx2 === idx1);
-            currentPair = [songs[idx1], songs[idx2]];
-        }
-        
-        // Update UI buttons with current pair names
-        function updateDuelUI() {
-            document.getElementById("song1").textContent = currentPair[0].name;
-            document.getElementById("song2").textContent = currentPair[1].name;
-        }
-        
-        function nextDuel() {
-            pickPair();
-            updateDuelUI();
-        }
-        
-        // Bind click events to song buttons
-        document.getElementById("song1").addEventListener("click", () => {
-            if (comparisonsCount < maxComparisons) {
-                updateRatings(currentPair[0], currentPair[1]);
-                comparisonsCount++;
-                if (comparisonsCount >= maxComparisons) {
-                    document.getElementById("song1").disabled = true;
-                    document.getElementById("song2").disabled = true;
-                } else {
-                    nextDuel();
-                }
-            }
-        });
-        
-        document.getElementById("song2").addEventListener("click", () => {
-            if (comparisonsCount < maxComparisons) {
-                updateRatings(currentPair[1], currentPair[0]);
-                comparisonsCount++;
-                if (comparisonsCount >= maxComparisons) {
-                    document.getElementById("song1").disabled = true;
-                    document.getElementById("song2").disabled = true;
-                } else {
-                    nextDuel();
-                }
-            }
-        });
-        
-        // New: Update ranking continuously along with progress display
-        function updateRankingUI() {
-            const progressText = `Comparisons: ${comparisonsCount} / ${maxComparisons}`;
-            const sorted = songs.slice().sort((a, b) => b.rating - a.rating);
-            const rankingList = "<h2>Ranking</h2><ol>" + 
-                sorted.map(s => `<li>${s.name} (Rating: ${s.rating.toFixed(0)})</li>`).join("") +
-            "</ol>";
-            document.getElementById("ranking").innerHTML = `<p>${progressText}</p>` + rankingList;
-        }
-        // Refresh ranking every 2 seconds.
-        setInterval(updateRankingUI, 2000);
-        updateRankingUI();
-        
-        // Start first duel
-        nextDuel();
-    </script>
+    <script src="scripts.js"></script>
 </body>
 </html>
