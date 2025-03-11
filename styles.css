@@ -63,3 +63,6 @@ button {
     margin-top: auto;
     margin-bottom: 20px;
 }
+#generated-image-container {
+    margin-top: 20px;
+}
