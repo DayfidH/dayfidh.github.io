@@ -19,7 +19,7 @@ const songs = [
 const K = 32;
 let currentPair = [];
 let comparisonsCount = 0;
-const maxComparisons = 10;
+const maxComparisons = 100;
 
 function expectedScore(r1, r2) {
     return 1 / (1 + Math.pow(10, (r2 - r1)/400));
